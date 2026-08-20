@@ -1,0 +1,16 @@
+{
+  "name": "@liner/covers-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "sign-token": "node scripts/sign-token.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250815.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.0.0"
+  }
+}

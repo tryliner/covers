@@ -1,0 +1,3 @@
+# Local-dev secrets for wrangler dev (this file is gitignored).
+# Wrangler auto-loads .dev.vars from the worker directory and injects these into env.
+COVER_TOKEN_SECRET=""

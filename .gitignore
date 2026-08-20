@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Cloudflare Wrangler
+.wrangler/
+
+# Build outputs
+dist/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+*.local
+.vscode/
+.idea/

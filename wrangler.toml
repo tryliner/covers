@@ -1,0 +1,16 @@
+name = "liner-covers"
+main = "src/index.ts"
+compatibility_date = "2025-08-15"
+
+# Custom domain. Add the route in the Cloudflare dashboard (Workers Routes) or
+# via `wrangler deploy` once the zone `tryliner.fun` is on this account.
+routes = [
+  { pattern = "covers.tryliner.fun", custom_domain = true },
+]
+
+# Reserved for the future signed-token secret. Set with:
+#   wrangler secret put COVER_TOKEN_SECRET
+# [vars] intentionally omitted — no plaintext config needed yet.
+
+[observability]
+enabled = true

@@ -1,9 +1,8 @@
 # @liner/covers-worker
 
-Cloudflare Worker behind **`covers.tryliner.fun`**. It proxies Innertube /
-Google cover art so users in regions where Google's image CDNs are blocked
-(RKN in Russia) can still load artwork. Cloudflare's edge is reachable there;
-Google is not.
+Cloudflare Worker behind **`covers.tryliner.fun`**. It proxies SoundCloud
+cover art so users in regions where external image CDNs are blocked
+can still load artwork. Cloudflare's edge is reachable there.
 
 ## Request flow
 
@@ -12,7 +11,7 @@ Client gets track/album/search
         ↓
 API returns { coverUrl, coverFallbackUrl }
         ↓
-Client tries coverUrl (direct Google) first
+Client tries coverUrl (direct SoundCloud) first
         ↓
 works → done
 fails → swap to coverFallbackUrl (this Worker)
@@ -23,7 +22,7 @@ Cloudflare edge cache
                     ↓
              validate token + host allowlist
                     ↓
-             fetch original Google URL at normalized size
+             fetch original SoundCloud URL
                     ↓
              return image, long TTL → Cloudflare caches it
 ```
@@ -36,9 +35,9 @@ GET /c/<token>?size=<128|256|512|1024>
 
 - **`<token>`** — `base64url(JSON)`:
   ```json
-  { "u": "https://lh3.googleusercontent.com/…", "s": 512 }
+  { "u": "https://i1.sndcdn.com/artworks-…", "s": 512 }
   ```
-  - `u` — the size-agnostic origin URL. Any trailing `=w…-h…` / `=s…` options
+  - `u` — the size-agnostic origin URL. Any trailing options
     are stripped and reapplied by the Worker, so **one cover = one token**
     regardless of the size the caller captured.
   - `s` — optional default size, used when `?size=` is absent.
@@ -48,10 +47,12 @@ GET /c/<token>?size=<128|256|512|1024>
 ### Host allowlist (hard requirement — prevents open-proxy/SSRF)
 
 ```
-i.ytimg.com
-yt3.ggpht.com
-lh3.googleusercontent.com
-yt3.googleusercontent.com
+i1.sndcdn.com
+i2.sndcdn.com
+i3.sndcdn.com
+i4.sndcdn.com
+img.sndcdn.com
+a1.sndcdn.com
 ```
 
 Only `https` origins on this list are fetched. Everything else → `403`.
@@ -60,11 +61,8 @@ Only `https` origins on this list are fetched. Everything else → `403`.
 
 Only `128 / 256 / 512 / 1024` produce a distinct cache key; any other value
 snaps to the nearest. This caps the edge cache at `covers × 4` entries instead
-of one per pixel width (`w120`, `w240`, `w544`, … would otherwise each be a
-separate key). For googleusercontent/ggpht the size is rewritten into the
-URL's options segment (`=w512-h512-l90-rj`, a square crop matching the
-backend's `toSquareArtworkUrl`); `i.ytimg.com` has no such param and passes
-through.
+of one per pixel width. SoundCloud CDNs keep size in the path/filename
+(e.g. `t500x500`), passing through directly.
 
 ### Caching
 
@@ -159,7 +157,7 @@ npm --workspace @liner/covers-worker run typecheck
 # an unsigned token (only accepted when the Worker's secret is unset):
 cd apps/workers/covers
 $secret = ((Get-Content .dev.vars | Select-String '^COVER_TOKEN_SECRET=').Line -split '=',2)[1].Trim('"')
-node scripts/sign-token.mjs "https://lh3.googleusercontent.com/<id>" 512 $secret
+node scripts/sign-token.mjs "https://i1.sndcdn.com/artworks-xxx-t500x500.jpg" 512 $secret
 # → prints: path: /c/<token>?size=512
 curl.exe "http://localhost:8787/c/<token>?size=512" -i --output cover.jpg
 ```

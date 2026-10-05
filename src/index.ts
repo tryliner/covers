@@ -2,11 +2,13 @@ export interface Env {
   COVER_TOKEN_SECRET?: string;
 }
 
-const ALLOWED_HOSTS: ReadonlySet<string> = new Set([
-  "i.ytimg.com",
-  "yt3.ggpht.com",
-  "lh3.googleusercontent.com",
-  "yt3.googleusercontent.com",
+export const ALLOWED_HOSTS: ReadonlySet<string> = new Set([
+  "i1.sndcdn.com",
+  "i2.sndcdn.com",
+  "i3.sndcdn.com",
+  "i4.sndcdn.com",
+  "img.sndcdn.com",
+  "a1.sndcdn.com",
 ]);
 
 const ALLOWED_SIZES = [128, 256, 512, 1024] as const;
@@ -137,7 +139,9 @@ function snapSize(requested: number | undefined): number {
 }
 
 function applySize(rawUrl: string, host: string, size: number): string {
-  if (host === "i.ytimg.com") return rawUrl;
+  if (host.endsWith(".sndcdn.com") || host === "sndcdn.com" || host === "i.ytimg.com") {
+    return rawUrl;
+  }
 
   const options = `=w${size}-h${size}-l90-rj`;
   const eq = rawUrl.indexOf("=");

@@ -9,11 +9,11 @@
  *
  * Usage:
  *   # unsigned (secret disabled on the Worker)
- *   node scripts/sign-token.mjs "https://i1.sndcdn.com/artworks-abc-t500x500.jpg" 512
+ *   node scripts/sign-token.mjs "https://lh3.googleusercontent.com/abc" 512
  *
  *   # signed — secret from arg or COVER_TOKEN_SECRET env
- *   COVER_TOKEN_SECRET=... node scripts/sign-token.mjs "https://i1.sndcdn.com/artworks-abc-t500x500.jpg" 512
- *   node scripts/sign-token.mjs "https://i1.sndcdn.com/artworks-abc-t500x500.jpg" 512 "my-secret"
+ *   COVER_TOKEN_SECRET=... node scripts/sign-token.mjs "https://lh3.googleusercontent.com/abc" 512
+ *   node scripts/sign-token.mjs "https://lh3.googleusercontent.com/abc" 512 "my-secret"
  *
  * Prints the path to hit, e.g. `/c/<token>?size=512`.
  */
@@ -29,13 +29,10 @@ if (!url) {
 }
 
 // Match the API: strip trailing size options so one cover yields one token.
-// sndcdn.com keeps size in the path, so leave it whole.
+// i.ytimg.com keeps size in the path, so leave it whole.
 const host = new URL(url).hostname;
 const eq = url.indexOf("=");
-const sizeAgnostic =
-  host.endsWith(".sndcdn.com") || host === "sndcdn.com" || host === "i.ytimg.com" || eq === -1
-    ? url
-    : url.slice(0, eq);
+const sizeAgnostic = host === "i.ytimg.com" || eq === -1 ? url : url.slice(0, eq);
 
 const payload = Buffer.from(JSON.stringify({ u: sizeAgnostic, s: size }), "utf8").toString("base64url");
 const token = secret
